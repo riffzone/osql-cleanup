@@ -1,0 +1,2 @@
+# osql-cleanup
+ OSQL.exe
