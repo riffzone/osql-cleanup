@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -10,17 +11,24 @@ import (
 
 func main() {
 
+	myOSNewLine := "\n"
+	if runtime.GOOS == "windows" {
+		myOSNewLine = "\r\n"
+	}
+
 	if len(os.Args) <= 1 {
-		fmt.Println("Usage : osql-cleanup.exe <folder> [<days>]")
-		fmt.Println("<folder> is the path of the folder to scan, sub-folders are ignored")
-		fmt.Println("The .BAK files older than <days> days are deleted, default value is 7 days")
-		fmt.Println("")
-		fmt.Println("The .BAK files can be created by the following command :")
-		fmt.Println("\"[PATH_TO]OSQL.exe\" -S <SQL_SERVER> -U <USER> -P <PASS> -Q \"BACKUP DATABASE <BASE_NAME> TO DISK='[EXPORT_PATH]%DATE:~6,4%%DATE:~3,2%%DATE:~0,2%-<BASE_NAME>.BAK'\"")
+		fmt.Print("Usage : osql-cleanup.exe <folder> [<days>]", myOSNewLine)
+		fmt.Print("<folder> is the path of the folder to scan, sub-folders are ignored", myOSNewLine)
+		fmt.Print("The .BAK files older than <days> days are deleted, default value is 7 days", myOSNewLine)
+		fmt.Print("", myOSNewLine)
+		fmt.Print("The .BAK files can be created by the following command :", myOSNewLine)
+		fmt.Print("\"[PATH_TO]OSQL.exe\" -S <SQL_SERVER> -U <USER> -P <PASS> -Q \"BACKUP DATABASE <BASE_NAME> TO DISK='[EXPORT_PATH]%DATE:~6,4%%DATE:~3,2%%DATE:~0,2%-<BASE_NAME>.BAK'\"", myOSNewLine)
 		return
 	}
 
 	myArgScanDirPath := os.Args[1]
+	myArgScanDirPath = strings.ReplaceAll(myArgScanDirPath, "\\\\", "\\")
+	myArgScanDirPath = strings.ReplaceAll(myArgScanDirPath, "\\", "/")
 	myArgScanDirPath = strings.TrimRight(myArgScanDirPath, "/")
 
 	myArgDaysAgo := 7
@@ -29,19 +37,19 @@ func main() {
 		if myArgDaysAgoStr != "" {
 			myStrConvInt, myStrConvErr := strconv.Atoi(myArgDaysAgoStr)
 			if myStrConvErr != nil {
-				fmt.Println(myArgDaysAgoStr + " is not an integer : ", myStrConvErr)
+				fmt.Print(myArgDaysAgoStr + " is not an integer : ", myStrConvErr, myOSNewLine)
 				return
 			}
 			myArgDaysAgo = myStrConvInt
 		}
 	}
 
-	fmt.Println("Scanning directory : ", myArgScanDirPath)
-	fmt.Println("Keep files for : ", myArgDaysAgo, " days")
+	fmt.Print("Scanning directory : ", myArgScanDirPath, myOSNewLine)
+	fmt.Print("Keep files for : ", myArgDaysAgo, " days", myOSNewLine)
 
 	myScanFiles, myScanErr := os.ReadDir(myArgScanDirPath)
 	if myScanErr != nil {
-		fmt.Println("Error reading directory : ", myScanErr)
+		fmt.Print("Error reading directory : ", myScanErr, myOSNewLine)
 		return
 	}
 
@@ -59,7 +67,7 @@ func main() {
 
 		myScanFileInfo, myStatErr := os.Stat(myScanFilePath)
 		if myStatErr != nil {
-			fmt.Println("Stat error : ", myStatErr)
+			fmt.Print("Stat error : ", myStatErr, myOSNewLine)
 			continue
 		}
 						
@@ -72,11 +80,11 @@ func main() {
 
 		myOSErr := os.Remove(myScanFilePath)
 		if myOSErr != nil {
-			fmt.Printf("Error deleting file "+myScanFilePath+" : %s\n", myOSErr)
+			fmt.Printf("Error deleting file "+myScanFilePath+" : %s"+myOSNewLine, myOSErr)
 			return
 		}
 
-		fmt.Println("Deleted file : ", myScanFilePath)
+		fmt.Print("Deleted file : ", myScanFilePath, myOSNewLine)
 	}
 
 }
