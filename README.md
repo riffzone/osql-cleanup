@@ -1,6 +1,6 @@
 # osql-cleanup
 
-Usage : osql-cleanup.exe \<folder\> [\<days\>]  
+Usage : osql-cleanup.exe --dir=\<folder\> [--days=\<days\>]  
 <folder> is the path of the folder to scan, sub-folders are ignored  
 The .BAK files older than \<days\> days are deleted, default value is 7 days  
   
